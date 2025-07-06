@@ -37,13 +37,14 @@ export default defineComponent({
             if (/\{\w+\}/.test(value)) {
               console.log(child.id, value, child)
               setTimeout(() => {
-                // const graph = diagramEditor.editor.graph
-                // const model = graph.getModel()
-                // const cell = model.getCell(child.id)
-                // model.beginUpdate();
+                const graph = diagramEditor.editor.graph
+                const model = graph.getModel()
+                const cell = model.getCell(child.id)
+                model.beginUpdate();
+                model.setValue(cell, 'real middle')
                 // 修改属性后不是mxcell,变成了UserObject
                 // graph.setAttributeForCell(cell, 'label', 'real middle')
-                // model.endUpdate();
+                model.endUpdate();
               }, 3000);
             }
             traverse(child);
