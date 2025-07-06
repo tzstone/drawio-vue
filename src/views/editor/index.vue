@@ -1,7 +1,5 @@
 <template>
-  <div >
     <div ref="xmlExampleContainer"></div>
-  </div>
 </template>
 
 <script lang="ts">
