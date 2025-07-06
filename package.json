@@ -85,7 +85,9 @@
     "last 2 versions",
     "not dead"
   ],
-  "gitHooks": {},
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
   "lint-staged": {
     "*.ts": [
       "vue-cli-service lint",
