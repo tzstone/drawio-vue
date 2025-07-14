@@ -154,6 +154,10 @@ table.mxPopupMenu {
   margin-top: 1px;
 }
 
+table.mxPopupMenu tr td {
+  padding: revert-layer;
+}
+
 tr.mxPopupMenuItem {
   color: black;
   cursor: pointer;

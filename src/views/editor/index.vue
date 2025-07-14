@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts">
+import { mxEvent } from "@/drawio/core/mxgraph";
 import { getLanguage } from "@/drawio/editor/i18n";
 import '@/drawio/index.scss';
 import { stringToXml, xmlToString } from "@/drawio/utils/xml";
@@ -85,8 +86,47 @@ export default defineComponent({
     });
 
     // 设置不可编辑
-    // const graph = diagramEditor.editor.graph
-    // graph.setEnabled(false);
+    const graph = diagramEditor.editor.graph
+    // 禁止节点和连线被编辑（双击编辑label）
+    graph.setCellsEditable(false);
+    // 禁止节点和连线被移动
+    graph.setCellsMovable(false);
+    // 禁止节点和连线被缩放
+    graph.setCellsResizable(false);
+    // 禁止节点和连线被删除
+    graph.setCellsDeletable(false);
+    // 禁止节点和连线被克隆
+    graph.setCellsCloneable(false);
+    // 禁止节点和连线被连线
+    graph.setConnectable(false);
+    // 禁止边的弯曲
+    graph.setCellsBendable(false);
+    // 禁止边断开
+    graph.setCellsDisconnectable(false);
+    // 禁止节点和连线被选中（可选，如果你不想有选中高亮）
+    graph.setCellsSelectable(false);
+    // 禁止橡皮筋框选（可选）
+    if (graph.setRubberbandSelectable) {
+      graph.setRubberbandSelectable(false);
+    }
+    // 彻底禁用 hover 创建新节点的方式
+    graph.connectionArrowsEnabled = false;
+    // 禁用右键菜单
+    graph.popupMenuHandler.factoryMethod = null;
+
+    // 监听节点点击
+    graph.addListener(mxEvent.CLICK, function(sender, evt) {
+      var cell = evt.getProperty('cell');
+
+      if (cell != null) {
+        // cell 被点击
+        console.log('点击了节点', cell);
+      } else {
+        // 空白处被点击
+        console.log('点击了空白');
+      }
+    });
+
   };
 
 
