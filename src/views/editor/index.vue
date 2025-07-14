@@ -85,8 +85,8 @@ export default defineComponent({
     });
 
     // 设置不可编辑
-    const graph = diagramEditor.editor.graph
-    graph.setEnabled(false);
+    // const graph = diagramEditor.editor.graph
+    // graph.setEnabled(false);
   };
 
 
