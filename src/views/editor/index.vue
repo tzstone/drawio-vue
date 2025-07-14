@@ -77,11 +77,16 @@ export default defineComponent({
       diagramEditor.exit();
     });
     const lang = await getLanguage("zh");
+
     diagramEditor.start(lang, stringToXml(xmlExample.value), function onXMLChange(xml: Node) {
       const xmlString = xmlToString(xml);
       xmlString && (xmlExample.value = xmlString);
       xmlString && convertXML(xmlString);
     });
+
+    // 设置不可编辑
+    const graph = diagramEditor.editor.graph
+    graph.setEnabled(false);
   };
 
 
