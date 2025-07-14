@@ -154,7 +154,7 @@ table.mxPopupMenu {
   margin-top: 1px;
 }
 
-table.mxPopupMenu tr td {
+table.mxPopupMenu td {
   padding: revert-layer;
 }
 
