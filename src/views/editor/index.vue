@@ -10,7 +10,6 @@ import { stringToXml, xmlToString } from "@/drawio/utils/xml";
 import { defineComponent, onMounted, onUnmounted, ref } from '@vue/composition-api';
 import { XML_DATA } from "./constant";
 import { loadEditor, loadViewer } from "./loader";
-import { clearElement } from "./utils";
 
 export default defineComponent({
   name: 'Editor',
@@ -18,6 +17,7 @@ export default defineComponent({
     const xmlExample = ref(XML_DATA)
     const xmlExampleContainer = ref()
     let diagramEditor
+    let diagramViewer
 
     // graph.setAttributeForCell
     // this.model.getCell(cells[i].id)
@@ -38,7 +38,8 @@ export default defineComponent({
             if (/\{\w+\}/.test(value)) {
               console.log(child.id, value, child)
               setTimeout(() => {
-                const graph = diagramEditor.editor.graph
+                // const graph = diagramEditor.editor.graph
+                const graph = diagramViewer.graph
                 const model = graph.getModel()
                 const cell = model.getCell(child.id)
                 model.beginUpdate();
@@ -60,14 +61,43 @@ export default defineComponent({
     const convertXML = (xml: string = xmlExample.value) => {
       const div = xmlExampleContainer.value;
       if (div) {
-        loadViewer().then(Viewer => {
+         loadViewer().then(Viewer => {
           const xmlDoc = stringToXml(xml)
-          traverseXML(xmlDoc.documentElement)
-          const diagramViewer = new Viewer(xmlDoc);
-          const svg = diagramViewer.renderSVG(null, 1, 1);
-          diagramViewer.destroy();
-          clearElement(div);
-          svg && div.appendChild(svg);
+          diagramViewer = new Viewer(xmlDoc);
+          // traverseXML(xmlDoc.documentElement)
+
+          diagramViewer.render(div)
+
+          const {graph} = diagramViewer
+
+          let mouseDownPos = null;
+
+          graph.addListener(mxEvent.MOUSE_DOWN, function(sender, evt) {
+            const e = evt.getProperty('event');
+            mouseDownPos = { x: e.clientX, y: e.clientY };
+          });
+          // TODO: 禁用框选后, 框选动作在某元素上结束时仍会触发click
+          graph.addListener(mxEvent.CLICK, function(sender, evt) {
+            const e = evt.getProperty('event');
+            if (mouseDownPos) {
+              const dx = Math.abs(e.clientX - mouseDownPos.x);
+              const dy = Math.abs(e.clientY - mouseDownPos.y);
+              // 阈值可根据实际体验调整
+              if (dx > 5 || dy > 5) {
+                // 认为是拖动，不处理点击
+                return;
+              }
+            }
+
+            var cell = evt.getProperty('cell'); // 获取点击的mxCell
+
+            if (cell) {
+              // 处理点击事件，例如弹出单元格的值
+              alert('点击了节点: ' + cell.value);
+            }
+          });
+
+
         });
       }
     };
@@ -84,54 +114,12 @@ export default defineComponent({
       xmlString && (xmlExample.value = xmlString);
       xmlString && convertXML(xmlString);
     });
-
-    // 设置不可编辑
-    const graph = diagramEditor.editor.graph
-    // 禁止节点和连线被编辑（双击编辑label）
-    graph.setCellsEditable(false);
-    // 禁止节点和连线被移动
-    graph.setCellsMovable(false);
-    // 禁止节点和连线被缩放
-    graph.setCellsResizable(false);
-    // 禁止节点和连线被删除
-    graph.setCellsDeletable(false);
-    // 禁止节点和连线被克隆
-    graph.setCellsCloneable(false);
-    // 禁止节点和连线被连线
-    graph.setConnectable(false);
-    // 禁止边的弯曲
-    graph.setCellsBendable(false);
-    // 禁止边断开
-    graph.setCellsDisconnectable(false);
-    // 禁止节点和连线被选中（可选，如果你不想有选中高亮）
-    graph.setCellsSelectable(false);
-    // 禁止橡皮筋框选（可选）
-    if (graph.setRubberbandSelectable) {
-      graph.setRubberbandSelectable(false);
-    }
-    // 彻底禁用 hover 创建新节点的方式
-    graph.connectionArrowsEnabled = false;
-    // 禁用右键菜单
-    graph.popupMenuHandler.factoryMethod = null;
-
-    // 监听节点点击
-    graph.addListener(mxEvent.CLICK, function(sender, evt) {
-      var cell = evt.getProperty('cell');
-
-      if (cell != null) {
-        // cell 被点击
-        console.log('点击了节点', cell);
-      } else {
-        // 空白处被点击
-        console.log('点击了空白');
-      }
-    });
-
   };
 
 
     onMounted(() => {
-      editXML()
+      // editXML()
+      convertXML(xmlExample.value)
     })
 
     onUnmounted(() => {

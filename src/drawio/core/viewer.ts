@@ -1,7 +1,7 @@
-import "../editor/js/Shapes";
-import { stringToXml } from "../utils/xml";
-import { DEFAULT_STYLE_XML } from "../styles/default";
 import { Graph } from "../editor/js/Graph";
+import "../editor/js/Shapes";
+import { DEFAULT_STYLE_XML } from "../styles/default";
+import { stringToXml } from "../utils/xml";
 import { mxCodec, mxEvent } from "./mxgraph";
 
 const themes: Record<string, Node> = {};
@@ -10,7 +10,7 @@ themes[Graph.prototype.defaultThemeName] = (
 ).documentElement;
 
 export class DiagramViewer {
-  private graph: Graph | null;
+  public graph: Graph | null;
   private container: HTMLDivElement | null;
 
   constructor(private xml: XMLDocument | null) {
@@ -20,7 +20,63 @@ export class DiagramViewer {
     this.graph = graph;
   }
 
-  public renderSVG = (background: string | null, scale = 1, border = 1): SVGElement | null => {
+  public render(el: HTMLDivElement) {
+    if (!this.graph) return null;
+
+    const codec = new mxCodec(this.xml);
+    // @ts-ignore
+    codec.decode(this.xml.documentElement, this.graph.getModel());
+
+    el.appendChild(this.container);
+
+    this.disableEditing();
+  }
+
+  private disableEditing() {
+    const graph = this.graph as any;
+
+    // 禁止编辑
+    graph.setCellsEditable(false);
+    // 禁止节点和连线被移动
+    graph.setCellsMovable(false);
+    // 禁止节点和连线被缩放
+    graph.setCellsResizable(false);
+    // 禁止节点和连线被删除
+    graph.setCellsDeletable(false);
+    // 禁止节点和连线被克隆
+    graph.setCellsCloneable(false);
+    // 禁止节点和连线被连线
+    graph.setConnectable(false);
+    // 禁止边的弯曲
+    graph.setCellsBendable(false);
+    // 禁止边断开
+    graph.setCellsDisconnectable(false);
+    // 禁止节点和连线被选中（可选，如果你不想有选中高亮）
+    graph.setCellsSelectable(false);
+    // 禁止拖放
+    graph.setDropEnabled(false);
+    // 禁止橡皮筋框选（可选）
+    if (graph.setRubberbandSelectable) {
+      graph.setRubberbandSelectable(false);
+    }
+    if (graph.getRubberband) {
+      graph.getRubberband()?.destroy();
+      graph.getRubberband = function () {
+        return null;
+      };
+    }
+
+    // 彻底禁用 hover 创建新节点的方式
+    graph.connectionArrowsEnabled = false;
+    // 禁用右键菜单
+    graph.popupMenuHandler.factoryMethod = null;
+  }
+
+  public renderSVG = (
+    background: string | null,
+    scale = 1,
+    border = 1
+  ): SVGElement | null => {
     if (!this.graph) return null;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
