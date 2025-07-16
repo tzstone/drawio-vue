@@ -65,6 +65,8 @@ export class DiagramViewer {
         return null;
       };
     }
+    // 禁用自动平移
+    graph.allowAutoPanning = false;
 
     // 彻底禁用 hover 创建新节点的方式
     graph.connectionArrowsEnabled = false;
